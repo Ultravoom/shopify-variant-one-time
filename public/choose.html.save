@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Select Your Smart Ring – UltraVoom</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0b10;
+      --grad1:#0b0d14;
+      --grad2:#0b0f18;
+      --panel:#0f1219;
+      --card:#121827;
+      --text:#eef2f7;
+      --muted:#a9b2c2;
+      --ring:#243043;
+      --ring-strong:#2c3a52;
+      --accent:#d4af37; /* gold */
+      --accent-2:#9e7b19;
+      --ok:#23d18b;
+      --err:#ff6161;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:radial-gradient(1300px 800px at 20% -10%, rgba(212,175,55,.08), transparent 70%),
+                 radial-gradient(1100px 700px at 120% 110%, rgba(255,255,255,.05), transparent 60%),
+                 linear-gradient(180deg,var(--grad1),var(--grad2));
+      color:var(--text);
+      font-family:"Jost",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      display:flex;flex-direction:column;min-height:100%;
+    }
+
+    /* ====== Layout ====== */
+    .topbar{
+      display:flex;align-items:center;gap:14px;
+      padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.06);
+      backdrop-filter:saturate(140%) blur(6px);
+    }
+    .logo{height:28px;display:block}
+    .brand{font-family:"Cormorant Garamond",serif;font-size:22px;letter-spacing:.02em}
+
+    .container{
+      flex:1;display:grid;place-items:center;padding:28px 16px;
+    }
+    .sheet{
+      width:100%;
+      max-width:1060px;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.02);
+      padding:28px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:28px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.00));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,.30);
+    }
+
+    h1{
+      font-family:"Cormorant Garamond",serif;
+      font-size:34px;margin:4px 0 8px 0;letter-spacing:.02em
+    }
+    p.sub{margin:0 0 16px 0;color:var(--muted)}
+
+    /* ====== Color selector ====== */
+    .colors{display:flex;gap:14px;flex-wrap:wrap}
+    .swatch{
+      width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;position:relative;font-weight:700;color:#111;text-shadow:0 1px 2px rgba(255,255,255,.35);
+      border:1px solid rgba(255,255,255,.12);
+      opacity:.95;transition:transform .15s ease, box-shadow .15s ease, outline-color .15s ease;
+      user-select:none;
+    }
+    .swatch span{filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+    .swatch[data-color="gold"]{background:radial-gradient(ellipse at 40% 20%, #F7D47C, #A47D2A)}
+    .swatch[data-color="silver"]{background:radial-gradient(ellipse at 40% 20%, #F5F5F7, #BDBDBF)}
+    .swatch[data-color="black"]{background:radial-gradient(ellipse at 40% 20%, #2a2a2d, #0f0f11);color:#f1f1f1;text-shadow:none}
+    .swatch:hover{transform:translateY(-2px)}
+    .swatch.active{box-shadow:0 0 0 4px rgba(212,175,55,.40), inset 0 0 0 2px rgba(255,255,255,.15)}
+
+    /* ====== Size selector ====== */
+    .sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    @media (max-width:520px){ .sizes{grid-template-columns:repeat(3,1fr)} }
+    .size{
+      height:52px;border-radius:14px;border:1.5px solid var(--ring-strong);
+      background:linear-gradient(180deg,#101521,#0e1420);
+      color:#d7deea;font-weight:700;letter-spacing:.02em;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      transition:border-color .12s ease, box-shadow .12s ease, transform .12s ease;
+    }
+    .size:hover{transform:translateY(-1px)}
+    .size.active{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+    .size[disabled]{opacity:.35;cursor:not-allowed;text-decoration:line-through}
+
+    .meta{display:flex;justify-content:space-between;align-items:center;margin:14px 2px 10px;color:var(--muted)}
+    .price{display:none} /* döljer priset helt */
+    .stockNote{font-weight:600}
+
+    .cta{
+      display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center
+    }
+    .btn{
+      border:0;border-radius:999px;padding:16px 24px;width:100%;
+      background:linear-gradient(145deg, #EAD186, #C69A2B);
+      color:#0f0f11;font-weight:800;letter-spacing:.04em;cursor:pointer;
+      box-shadow:0 14px 28px rgba(212,175,55,.28);
+      transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 18px 34px rgba(212,175,55,.34)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed;filter:grayscale(.2)}
+    .status{min-height:22px;font-weight:700;text-align:center}
+    .ok{color:var(--ok)} .err{color:var(--err)}
+
+    .section-title{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#c7cfe0;margin:0 0 10px}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <img class="logo" alt="UltraVoom" src="https://cdn.shopify.com/s/files/1/0961/3164/5785/files/Untitled_design_b59fdca0-2846-44ac-b843-ffbf705bc58c.png?v=1759361560">
+    <div class="brand">UltraVoom</div>
+  </div>
+
+  <div class="container">
+    <div class="sheet">
+      <div class="grid">
+
+        <!-- Left: Info & Color -->
+        <div class="card">
+          <h1>Select your Smart Ring</h1>
+          <p class="sub">Choose color and size. Only sizes currently in stock can be selected.</p>
+
+          <p class="section-title">Color</p>
+          <div class="colors">
+            <button class="swatch" data-color="gold"  aria-pressed="false"><span>GOLD</span></button>
+            <button class="swatch" data-color="silver" aria-pressed="false"><span>SILVER</span></button>
+            <button class="swatch" data-color="black" aria-pressed="false"><span>BLACK</span></button>
+          </div>
+        </div>
+
+        <!-- Right: Sizes & CTA -->
+        <div class="card">
+          <div class="meta">
+            <div class="price" id="price"></div>
+            <div class="stockNote" id="stockNote">–</div>
+          </div>
+          <div id="sizes" class="sizes" role="group" aria-label="Sizes"></div>
+
+          <div class="cta">
+            <button id="confirm" class="btn" disabled>CONFIRM SELECTION</button>
+            <div id="status" class="status"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Mapping & State ======
+    // Shopify option1 values in your store: "guld", "Silver", "Svart"
+    const COLOR_MAP = { gold: "guld", silver: "Silver", black: "Svart" };
+    const ALLOWED_SIZES = ["6","7","8","9","10","11","12","13"];
+
+    let product = null;
+    let selectedColor = "gold";
+    let selectedSize = null;
+    let selectedVariantId = null;
+    let locked = false; // client-side lock after first submit
+
+    const els = {
+      swatches: [...document.querySelectorAll(".swatch")],
+      sizes: document.getElementById("sizes"),
+      price: document.getElementById("price"),
+      stockNote: document.getElementById("stockNote"),
+      confirm: document.getElementById("confirm"),
+      status: document.getElementById("status"),
+    };
+
+    function tokenKey() {
+      const u = new URL(window.location.href);
+      const t = u.searchParams.get("token") || "no-token";
+      return "uv_selection_done_" + t;
+    }
+
+    function checkLock() {
+      locked = sessionStorage.getItem(tokenKey()) === "1";
+      if (locked) {
+        disableAll();
+        els.status.textContent = "✔ Already submitted. Thank you!";
+        els.status.className = "status ok";
+      }
+    }
+
+    function setStatus(msg, kind) {
+      els.status.textContent = msg || "";
+      els.status.className = "status " + (kind || "");
+    }
+
+    function disableAll() {
+      els.confirm.disabled = true;
+      els.swatches.forEach(b => b.disabled = true);
+      [...els.sizes.querySelectorAll(".size")].forEach(s => s.disabled = true);
+    }
+
+    function setActiveSwatch() {
+      els.swatches.forEach(b=>{
+        const on = b.dataset.color === selectedColor;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-pressed", on ? "true":"false");
+      });
+    }
+
+    function renderSizes() {
+      els.sizes.innerHTML = "";
+      if (!product) return;
+
+      const shopColor = COLOR_MAP[selectedColor];
+      const variants = product.variants.filter(v => (v.option1||"").toLowerCase() === shopColor.toLowerCase());
+
+      const avail = {};
+      variants.forEach(v=>{
+        const size = (v.option2||"").trim();
+        if (ALLOWED_SIZES.includes(size) && Number(v.inventory_quantity) > 0) {
+          avail[size] = v;
+        }
+      });
+
+      const count = Object.keys(avail).length;
+      els.stockNote.textContent = count > 0 ? `In stock in ${count} sizes` : `Out of stock in this color`;
+
+      selectedVariantId = null;
+      selectedSize = null;
+      els.confirm.disabled = true;
+
+      ALLOWED_SIZES.forEach(size=>{
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "size";
+        btn.textContent = size;
+
+        if (!avail[size] || locked) {
+          btn.disabled = true;
+        } else {
+          btn.addEventListener("click", ()=>{
+            [...els.sizes.querySelectorAll(".size")].forEach(s=>s.classList.remove("active"));
+            btn.classList.add("active");
+            selectedSize = size;
+            selectedVariantId = avail[size].id;
+            els.confirm.disabled = !selectedVariantId || locked;
+            setStatus("", "");
+          });
+        }
+        els.sizes.appendChild(btn);
+      });
+    }
+
+    async function load() {
+      try {
+        const r = await fetch("/api/products");
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || "Failed to fetch products");
+
+        // Pick your Smart Ring product, else the first product with variants
+        product =
+          data.products.find(p => (p.title||"").toLowerCase().includes("smart ring")) ||
+          data.products[0];
+
+        if (!product) throw new Error("No product found");
+
+        checkLock();
+        setActiveSwatch();
+        renderSizes();
+      } catch (e) {
+        setStatus("Could not load products. Please try again.", "err");
+        console.error(e);
+      }
+    }
+
+    // Swatch handlers
+    els.swatches.forEach(b=>{
+      b.addEventListener("click", ()=>{
+        if (locked) return;
+        selectedColor = b.dataset.color;
+        setActiveSwatch();
+        renderSizes();
+      });
+    });
+
+    // Confirm handler
+    els.confirm.addEventListener("click", async ()=>{
+      if (!selectedVariantId || locked) return;
+      els.confirm.disabled = true;
+      setStatus("Submitting...", "");
+      try {
+        const r = await fetch("/api/choose", {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify({ variantId: String(selectedVariantId) })
+        });
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || "Could not save selection");
+
+        // lock UI for this token
+        sessionStorage.setItem(tokenKey(), "1");
+        locked = true;
+        disableAll();
+        setStatus("✔ Thank you! Your selection has been registered.", "ok");
+        els.confirm.textContent = "ALREADY SUBMITTED";
+      } catch (e) {
+        setStatus("Something went wrong. Please try again.", "err");
+        console.error(e);
+        els.confirm.disabled = false;
+      }
+    });
+
+    load();
+  </script>
+</body>
+</html>
+

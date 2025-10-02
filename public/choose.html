@@ -179,8 +179,9 @@
         const r = await fetch('/api/products');
         const data = await r.json();
         if (!data.ok) throw new Error();
-        products = data.products;
-
+        
+products = data.products;
+console.log('--- DATA FRÅN SHOPIFY API ---', products);
         const colorsAvailable = new Set();
         for (const p of products) {
           for (const v of p.variants||[]) {

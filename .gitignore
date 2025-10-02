@@ -1,1 +1,10 @@
+# Ignorera miljövariabler
 .env
+.env.*
+!.env.example
+
+# Ignorera systemfiler
+.DS_Store
+
+# Ignorera dependencies-mappen
+/node_modules

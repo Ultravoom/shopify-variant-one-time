@@ -1,5 +1,5 @@
 // index.js
-// TILLFÄLLIG VERSION FÖR SHOPIFY SUPPORT
+// SLUTGILTIG VERSION 2.4 - Korrigerat stavfel
 
 // import dotenv from "dotenv";
 // dotenv.config();
@@ -62,11 +62,9 @@ app.post("/webhooks/orders-paid", async (req, res) => {
     }
 });
 
-// API för att hämta produkter
 app.get("/api/products", async (_req, res) => {
     try {
-        // TILLFÄLLIG ÄNDRING: Hämtar ALLA produkter
-        const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json`;
+        const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json?handle=smart-ring-pro`;
         const r = await fetch(url, { headers: { "X-Shopify-Access-Token": ADMIN_TOKEN, "Accept": "application/json" } });
         const body = await r.json();
         if (!r.ok) throw new Error(body.errors || 'Unknown API error');
@@ -88,7 +86,8 @@ app.post("/api/choose", async (req, res) => {
     }
     try {
         tokenData.used = true;
-        const variantUrl = `https-://${SHOP}/admin/api/${API_VERSION}/variants/${variantId}.json`;
+        // KORRIGERAD RAD: Tog bort extra bindestreck
+        const variantUrl = `https://${SHOP}/admin/api/${API_VERSION}/variants/${variantId}.json`;
         const r = await fetch(variantUrl, { headers: { "X-Shopify-Access-Token": ADMIN_TOKEN, "Accept": "application/json" } });
         const { variant } = await r.json();
         const adr = tokenData.shippingAddress;

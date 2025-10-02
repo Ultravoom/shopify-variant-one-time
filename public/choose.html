@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Choose your Smart Ring – UltraVoom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --panel:#0f131b;
+      --card:#121722;
+      --text:#e9eef6;
+      --muted:#a6b0c2;
+      --border:#1f2733;
+      --gold:#d4af37;
+      --gold-2:#c09a2f;
+      --ok:#19c37d;
+      --err:#ff5c5c;
+    }
+
+    *{ box-sizing: border-box; }
+
+    html,body{
+      height:100%;
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at -10% -20%, rgba(212,175,55,.06), transparent 40%),
+        radial-gradient(1000px 500px at 110% 10%, rgba(212,175,55,.05), transparent 45%),
+        linear-gradient(180deg, #0b0c10 0%, #0d1118 60%, #0a0f16 100%);
+      font:16px/1.55 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    header{
+      position:sticky; top:0; z-index:10;
+      display:flex; align-items:center; justify-content:center;
+      padding:14px 18px;
+      border-bottom:1px solid var(--border);
+      background:rgba(10,14,20,.75);
+      backdrop-filter: blur(8px);
+    }
+    header img{ height:32px; }
+
+    .wrap{ max-width:980px; margin:32px auto; padding:0 18px; }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.0));
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    h1{
+      margin:0 0 6px;
+      font-family:"Cormorant Garamond", serif;
+      font-weight:600;
+      font-size:34px;
+      letter-spacing:.2px;
+      text-align:center;
+    }
+
+    p.muted{ margin:0 0 14px; color:var(--muted); text-align:center; }
+
+    /* Color buttons */
+    .row{ display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin:12px 0; }
+    .chip{
+      width:70px; height:70px;
+      border-radius:50%;
+      border:3px solid transparent;
+      cursor:pointer;
+      transition:all .2s ease;
+      position:relative;
+    }
+    .chip span{
+      position:absolute;
+      bottom:-24px; left:50%;
+      transform:translateX(-50%);
+      font-size:14px;
+      color:var(--muted);
+      font-weight:600;
+    }
+    .chip.gold{ background: linear-gradient(145deg, #d4af37, #b9962b); }
+    .chip.silver{ background: linear-gradient(145deg, #dfe2e6, #aeb4bf); }
+    .chip.black{ background: linear-gradient(145deg, #111, #333); }
+    .chip.active{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,.35); }
+    .chip[disabled]{ opacity:.35; cursor:not-allowed; }
+
+    /* Sizes */
+    .grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:16px; }
+    @media (max-width:860px){ .grid{ grid-template-columns:repeat(3,1fr); } }
+    @media (max-width:560px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+
+    .size{
+      background:#fff;
+      color:#111;
+      border:1px solid #d4d7dd;
+      border-radius:12px;
+      padding:14px 10px;
+      text-align:center;
+      cursor:pointer;
+      transition:all .15s ease;
+      font-weight:700;
+    }
+    .size:hover{ border-color:#aeb4bf; }
+    .size.active{ background:#000; color:#fff; border-color:#000; }
+    .size[disabled]{ opacity:.4; cursor:not-allowed; text-decoration: line-through; }
+
+    /* CTA */
+    .cta-row{ display:flex; align-items:center; justify-content:center; margin-top:24px; }
+    .btn{
+      background: linear-gradient(180deg, var(--gold) 0%, var(--gold-2) 100%);
+      color:#151515; font-weight:800; letter-spacing:.3px;
+      border:0; border-radius:14px; padding:16px 22px;
+      cursor:pointer; min-width:220px;
+      box-shadow:0 10px 26px rgba(212,175,55,.25);
+      transition: transform .06s ease, box-shadow .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow:0 16px 34px rgba(212,175,55,.33); }
+    .btn:active{ transform: translateY(0); box-shadow:0 8px 18px rgba(212,175,55,.24); }
+    .btn[disabled]{ filter:grayscale(.15) brightness(.85); cursor:not-allowed; box-shadow:none; }
+
+    .status{ font-weight:700; text-align:center; margin-top:14px; }
+    .status.ok{ color:var(--ok); }
+    .status.err{ color:var(--err); }
+  </style>
+</head>
+<body>
+  <header>
+    <img
+      src="https://cdn.shopify.com/s/files/1/0961/3164/5785/files/Untitled_design_b59fdca0-2846-44ac-b843-ffbf705bc58c.png?v=1759361560"
+      alt="UltraVoom logo" />
+  </header>
+
+  <main class="wrap">
+    <div class="card">
+      <h1>Choose your Smart Ring</h1>
+      <p class="muted">Only sizes in stock can be selected. Your ring is already paid — this page is only for picking color and size.</p>
+
+      <!-- Colors -->
+      <div id="colors" class="row"></div>
+
+      <!-- Sizes -->
+      <div id="sizes" class="grid"></div>
+
+      <div class="cta-row">
+        <button id="confirmBtn" class="btn" disabled>Confirm choice</button>
+      </div>
+      <div id="status" class="status muted"></div>
+    </div>
+  </main>
+
+  <script>
+    let products = [];
+    let currentColorKey = null;
+    let currentVariantId = null;
+
+    const colorsEl = document.getElementById('colors');
+    const sizesEl  = document.getElementById('sizes');
+    const statusEl = document.getElementById('status');
+    const confirmBtn = document.getElementById('confirmBtn');
+
+    const COLOR_KEY = (name) => {
+      const n = String(name||'').trim().toLowerCase();
+      if (n === 'guld') return 'gold';
+      if (n === 'svart') return 'black';
+      if (n === 'silver') return 'silver';
+      return n;
+    };
+    const COLOR_LABEL = { gold:'Gold', silver:'Silver', black:'Black' };
+    const SIZES = ['6','7','8','9','10','11','12','13'];
+
+    async function loadProducts() {
+      try {
+        const r = await fetch('/api/products');
+        const data = await r.json();
+        if (!data.ok) throw new Error();
+        products = data.products;
+
+        const colorsAvailable = new Set();
+        for (const p of products) {
+          for (const v of p.variants||[]) {
+            const colorKey = COLOR_KEY(v.option1);
+            const qty = Number(v.inventory_quantity||0);
+            if (['gold','silver','black'].includes(colorKey) && qty > 0) {
+              colorsAvailable.add(colorKey);
+            }
+          }
+        }
+
+        colorsEl.innerHTML='';
+        ['gold','silver','black'].forEach(key=>{
+          const btn=document.createElement('div');
+          btn.className=`chip ${key}`;
+          btn.innerHTML=`<span>${COLOR_LABEL[key]}</span>`;
+          if (!colorsAvailable.has(key)) btn.setAttribute('disabled','true');
+          btn.addEventListener('click',()=>{
+            currentColorKey=key;
+            [...colorsEl.querySelectorAll('.chip')].forEach(c=>c.classList.remove('active'));
+            btn.classList.add('active');
+            renderSizes();
+            status('');
+          });
+          colorsEl.appendChild(btn);
+        });
+
+        const first=colorsEl.querySelector('.chip:not([disabled])');
+        if(first) first.click();
+
+      } catch(e) {
+        status('Could not load products.', true);
+      }
+    }
+
+    function renderSizes(){
+      currentVariantId=null;
+      confirmBtn.disabled=true;
+      sizesEl.innerHTML='';
+
+      const sizeToVariant=new Map();
+      for(const p of products){
+        for(const v of p.variants||[]){
+          const color=COLOR_KEY(v.option1);
+          const size=String(v.option2||'').trim();
+          const qty=Number(v.inventory_quantity||0);
+          if(color===currentColorKey && SIZES.includes(size)){
+            sizeToVariant.set(size,{id:v.id,qty});
+          }
+        }
+      }
+
+      SIZES.forEach(size=>{
+        const btn=document.createElement('button');
+        btn.className='size';
+        btn.textContent=size;
+        const map=sizeToVariant.get(size);
+        const disabled=!map || map.qty<=0;
+        if(disabled) btn.disabled=true;
+        btn.addEventListener('click',()=>{
+          if(disabled) return;
+          currentVariantId=map.id;
+          [...sizesEl.querySelectorAll('.size')].forEach(s=>s.classList.remove('active'));
+          btn.classList.add('active');
+          confirmBtn.disabled=false;
+          status('');
+        });
+        sizesEl.appendChild(btn);
+      });
+    }
+
+    async function submitChoice(){
+      if(!currentVariantId) return;
+      confirmBtn.disabled=true;
+      try{
+        const r=await fetch('/api/choose',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({variantId:String(currentVariantId)})
+        });
+        const data=await r.json();
+        if(!r.ok||!data.ok) throw new Error();
+        status('✅ Thank you! Your choice has been registered.',false,true);
+        [...document.querySelectorAll('button')].forEach(b=>b.disabled=true);
+      }catch(e){
+        status('❌ Something went wrong.',true);
+        confirmBtn.disabled=false;
+      }
+    }
+
+    function status(msg,isErr=false,isOk=false){
+      statusEl.textContent=msg||'';
+      statusEl.className='status'+(isErr?' err':isOk?' ok':' muted');
+    }
+
+    confirmBtn.addEventListener('click',submitChoice);
+    loadProducts();
+  </script>
+</body>
+</html>
+

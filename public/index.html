@@ -1,0 +1,66 @@
+import 'dotenv/config';
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Variant One-Time Selector</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; }
+    header { padding: 16px 20px; border-bottom: 1px solid #ddd; }
+    main { max-width: 880px; margin: 24px auto; padding: 0 20px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #ccc; cursor: pointer; }
+    .row { display: flex; gap: 12px; align-items: center; }
+    .muted { opacity: .7; font-size: 14px; }
+    .ok { color: #0a7f36; font-weight: 600; }
+    .err { color: #b00020; font-weight: 600; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>Variant One-Time Selector</h2>
+    <div class="muted">Inbäddad i Shopify admin via <span class="mono">choose.ultravoom.se</span></div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h3>1) Testa anslutning</h3>
+      <p>Detta ropar på din backend som i sin tur pingar Shopify Admin API med din <span class="mono">ADMIN_TOKEN</span>.</p>
+      <div class="row">
+        <button id="pingBtn">Ping Shopify</button>
+        <div id="pingResult" class="muted">—</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>2) Nästa steg</h3>
+      <ol>
+        <li>Visa produkter/varianter.</li>
+        <li>Skapa “one-time selector”-logik.</li>
+        <li>Knapp för att aktivera per produkt.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    const elBtn = document.getElementById('pingBtn');
+    const elOut = document.getElementById('pingResult');
+
+    elBtn.addEventListener('click', async () => {
+      elOut.textContent = 'Pingar...';
+      try {
+        const res = await fetch('/api/ping');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        elOut.innerHTML = `<span class="ok">OK</span> — Butik: <b>${data.shop?.name}</b> (<span class="mono">${data.shop?.domain}</span>)`;
+      } catch (e) {
+        elOut.innerHTML = `<span class="err">Fel</span> — ${e.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
+

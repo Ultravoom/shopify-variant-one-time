@@ -107,12 +107,16 @@
           const btn = document.createElement('button');
           btn.className = 'size';
           btn.textContent = size;
-          const map = sizeToVariant.get(size);
-          const disabled = !map || map.qty <= 0;
+          
+          // ##### TILLFÄLLIG ÄNDRING FÖR FELSÖKNING #####
+          // Denna rad tvingar alla knappar att vara aktiva
+          const disabled = false;
+          // #############################################
+
           if (disabled) btn.disabled = true;
           btn.addEventListener('click', () => {
             if (disabled) return;
-            currentVariantId = map.id;
+            currentVariantId = sizeToVariant.get(size)?.id; // Hämta id från map
             [...sizesEl.querySelectorAll('.size')].forEach(s => s.classList.remove('active'));
             btn.classList.add('active');
             confirmBtn.disabled = false;

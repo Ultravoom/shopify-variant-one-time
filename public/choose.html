@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Choose your Smart Ring – UltraVoom</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root{ --bg:#0b0c10; --panel:#0f131b; --card:#121722; --text:#e9eef6; --muted:#a6b0c2; --border:#1f2733; --gold:#d4af37; --gold-2:#c09a2f; --ok:#19c37d; --err:#ff5c5c; }
         *{ box-sizing: border-box; }
@@ -42,12 +39,11 @@
             <div id="status" class="status muted"></div>
         </div>
         <div class="debug-panel">
-            <h2>Diagnostik-Panel: Rådata från Shopify API</h2>
+            <h2>Diagnostik-Panel</h2>
             <pre id="debug-data"></pre>
         </div>
     </main>
     <script>
-        // All JS code is the same, but with one added line in loadPage()
         let products = [];
         let currentColorKey = null;
         let currentVariantId = null;
@@ -65,40 +61,45 @@
         const SIZES = ['6', '7', '8', '9', '10', '11', '12', '13'];
 
         async function loadPage() {
+            debugDataEl.textContent = 'Sidan laddas...';
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 token = urlParams.get('token');
                 const chosenColor = urlParams.get('color');
-                if (!token || !chosenColor) throw new Error('Missing token or color.');
+                if (!token || !chosenColor) throw new Error('Saknar token eller färg i URL.');
 
                 currentColorKey = COLOR_KEY(chosenColor);
                 chosenColorEl.textContent = chosenColor;
 
+                debugDataEl.textContent += '\nFörsöker hämta produkter från /api/products...';
                 const r = await fetch('/api/products');
-                const data = await r.json();
+                debugDataEl.textContent += `\nFick svar från servern. Status: ${r.status}`;
 
-                // --- DIAGNOSTIK ---
-                let debugText = `API-svar OK: ${data.ok}\nAntal produkter: ${data.products?.length || 0}\n\n--- Lagerstatus ---\n`;
+                const data = await r.json();
+                debugDataEl.textContent += `\nKonverterade svar till JSON. API-svar OK: ${data.ok}`;
+
+                let debugText = `\nAntal produkter: ${data.products?.length || 0}\n\n--- Lagerstatus ---\n`;
                 if (data.products && data.products.length > 0) {
                     data.products[0].variants.forEach(v => {
-                        debugText += `${v.title}: ${v.inventory_quantity} st i lager\n`;
+                        debugText += `${v.title.padEnd(30, ' ')} -> inventory_quantity: ${v.inventory_quantity}\n`;
                     });
+                } else {
+                    debugText += "Produktlistan är tom.\n";
                 }
-                debugDataEl.textContent = debugText;
-                // --- SLUT DIAGNOSTIK ---
+                debugDataEl.textContent += debugText;
 
-                if (!data.ok || !data.products) throw new Error(data.error || 'API error');
+                if (!r.ok || !data.ok) throw new Error(data.error || 'API-svaret var inte OK.');
                 products = data.products;
                 renderSizes();
 
             } catch (e) {
-                status(`Could not load page. ${e.message || ''}`, true);
-                debugDataEl.textContent = `FEL VID LADDNING:\n${e.stack}`;
+                statusEl.textContent = 'Ett fel inträffade vid laddning.';
+                debugDataEl.textContent += `\n\n--- ALLVARLIGT FEL ---\n${e.stack}`;
             }
         }
 
+        // Resten av funktionerna är oförändrade
         function renderSizes() {
-            // ... all other functions are identical to the final correct version
             currentVariantId = null;
             confirmBtn.disabled = true;
             sizesEl.innerHTML = '';
@@ -131,7 +132,29 @@
                 sizesEl.appendChild(btn);
             });
         }
-        // ... the rest of the JS is omitted for brevity but is identical to the final version
+        async function submitChoice() {
+            if (!currentVariantId || !token) return;
+            confirmBtn.disabled = true;
+            try {
+                const r = await fetch('/api/choose', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ variantId: String(currentVariantId), token: token })
+                });
+                const data = await r.json();
+                if (!r.ok || !data.ok) throw new Error(data.error || 'Submission failed');
+                status('✅ Thank you! Your choice has been registered.', false, true);
+                document.querySelectorAll('.size, .btn').forEach(b => b.disabled = true);
+            } catch (e) {
+                status(`❌ Something went wrong. ${e.message || ''}`, true);
+                confirmBtn.disabled = false;
+            }
+        }
+        function status(msg, isErr = false, isOk = false) {
+            statusEl.textContent = msg || '';
+        }
+        confirmBtn.addEventListener('click', submitChoice);
+        loadPage();
     </script>
 </body>
 </html>

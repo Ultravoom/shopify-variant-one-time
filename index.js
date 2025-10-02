@@ -1,3 +1,4 @@
+const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json?handle=smart-ring-pro`;
 // index.js
 // Sista justeringen: Smartare variant-matchning
 
@@ -90,7 +91,7 @@ app.post("/webhooks/orders-paid", async (req, res) => {
 // ----- API Routes -----
 app.get("/api/products", async (_req, res) => {
   try {
-    const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json?handle=smart-ring-pro`;
+    const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json`;
     const r = await fetch(url, { headers: { "X-Shopify-Access-Token": ADMIN_TOKEN, "Accept": "application/json" } });
     const body = await r.json();
     if (!r.ok) throw new Error(body.errors);

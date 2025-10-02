@@ -107,16 +107,13 @@
           const btn = document.createElement('button');
           btn.className = 'size';
           btn.textContent = size;
-          
-          // ##### TILLFÄLLIG ÄNDRING FÖR FELSÖKNING #####
-          // Denna rad tvingar alla knappar att vara aktiva
-          const disabled = false;
-          // #############################################
-
+          const map = sizeToVariant.get(size);
+          // Detta är den KORREKTA, säkra koden som kollar lagersaldot.
+          const disabled = !map || map.qty <= 0;
           if (disabled) btn.disabled = true;
           btn.addEventListener('click', () => {
             if (disabled) return;
-            currentVariantId = sizeToVariant.get(size)?.id; // Hämta id från map
+            currentVariantId = map.id;
             [...sizesEl.querySelectorAll('.size')].forEach(s => s.classList.remove('active'));
             btn.classList.add('active');
             confirmBtn.disabled = false;

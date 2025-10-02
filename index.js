@@ -1,5 +1,5 @@
 // index.js
-// SLUTGILTIG VERSION 2.0 - Tar bort färgvalet
+// SLUTGILTIG VERSION 2.1 - Renstädad
 
 // import dotenv from "dotenv";
 // dotenv.config();
@@ -39,20 +39,13 @@ app.post("/webhooks/orders-paid", async (req, res) => {
     console.log(`Webhook mottagen för order: ${order.name}`);
     try {
         const sizingKitItem = order.line_items.find((item) => item.variant_title.includes("Sizing Kit First"));
-
         if (sizingKitItem) {
             console.log(`Order ${order.name} innehåller Sizing Kit. Skapar och mailar länk...`);
-
-            // Extrahera färgen från variant-titeln (t.ex. "Silver / Sizing Kit First")
             const titleParts = sizingKitItem.variant_title.split('/');
-            const colorName = titleParts[0].trim().toLowerCase(); // Blir t.ex. "silver"
-
+            const colorName = titleParts[0].trim().toLowerCase();
             const token = uuidv4();
             tokenStore[token] = { orderId: order.id, orderName: order.name, email: order.email, shippingAddress: order.shipping_address, used: false, createdAt: new Date() };
-
-            // Lägg till färgen i länken!
             const uniqueUrl = `https://choose.ultravoom.se/choose.html?token=${token}&color=${colorName}`;
-
             await mailer.sendMail({
                 from: `"UltraVoom" <${process.env.SMTP_USER}>`,
                 to: order.email,
@@ -117,12 +110,6 @@ app.post("/api/choose", async (req, res) => {
         console.error("Error in /api/choose:", err);
         res.status(500).json({ ok: false, error: String(err) });
     }
-});
-
-// Extremt enkel test-mottagare
-app.post("/test", (req, res) => {
-    console.log("!!! TEST WEBHOOK MOTTETAGET PÅ /test !!!");
-    res.status(200).send("OK FROM /test");
 });
 
 // Starta servern

@@ -1,9 +1,8 @@
-const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json?handle=smart-ring-pro`;
 // index.js
-// Sista justeringen: Smartare variant-matchning
+// Test: dotenv är inaktiverat
 
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
 
 import express from "express";
 import { fetch } from "undici";
@@ -39,20 +38,15 @@ const mailer = nodemailer.createTransport({
   },
 });
 
-// ----- Webhook Routes -----
 app.post("/webhooks/orders-paid", async (req, res) => {
   const order = req.body;
   console.log(`Webhook mottagen för order: ${order.name}`);
-
   try {
-    // HÄR ÄR ÄNDRINGEN: .includes() istället för ===
     const containsSizingKit = order.line_items.some(
       (item) => item.variant_title.includes("Sizing Kit First")
     );
-
     if (containsSizingKit) {
       console.log(`Order ${order.name} innehåller Sizing Kit. Skapar och mailar länk...`);
-
       const token = uuidv4();
       tokenStore[token] = {
         orderId: order.id,
@@ -62,10 +56,8 @@ app.post("/webhooks/orders-paid", async (req, res) => {
         used: false,
         createdAt: new Date(),
       };
-
       const uniqueUrl = `https://choose.ultravoom.se/choose.html?token=${token}`;
       console.log(`Skapad länk för ${order.email}: ${uniqueUrl}`);
-
       await mailer.sendMail({
         from: `"UltraVoom" <${process.env.SMTP_USER}>`,
         to: order.email,
@@ -73,22 +65,17 @@ app.post("/webhooks/orders-paid", async (req, res) => {
         text: `Hej ${order.customer.first_name || ''}!\n\nTack för din beställning. Välj din färg och storlek via länken nedan för att slutföra din order.\n\n${uniqueUrl}\n\nVänliga hälsningar,\nTeam UltraVoom`,
         html: `<p>Hej ${order.customer.first_name || ''}!</p><p>Tack för din beställning. Välj din färg och storlek via länken nedan för att slutföra din order.</p><p><a href="${uniqueUrl}"><strong>Klicka här för att välja din ring</strong></a></p><p>Vänliga hälsningar,<br>Team UltraVoom</p>`,
       });
-
       console.log(`Mejl skickat till ${order.email}`);
-
     } else {
       console.log(`Order ${order.name} innehåller INTE Sizing Kit. Ignorerar.`);
     }
-
     res.status(200).send("OK");
-
   } catch (err) {
     console.error("Fel i webhook-hanteraren:", err);
     res.status(500).send("Error processing webhook");
   }
 });
 
-// ----- API Routes -----
 app.get("/api/products", async (_req, res) => {
   try {
     const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json`;
@@ -106,7 +93,6 @@ app.post("/api/choose", async (req, res) => {
   res.json({ ok: true });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

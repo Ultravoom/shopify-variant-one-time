@@ -1,5 +1,5 @@
 // index.js
-// Uppdaterad med automatisk e-postutskick
+// Sista justeringen: Smartare variant-matchning
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -26,7 +26,6 @@ const PORT = process.env.PORT || 3000;
 const SHOP = process.env.SHOP;
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 const API_VERSION = process.env.API_VERSION || "2025-10";
-// ANVÄND DIN RIKTIGA ADRESS HÄR!
 const APP_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
 const mailer = nodemailer.createTransport({
@@ -41,13 +40,13 @@ const mailer = nodemailer.createTransport({
 
 // ----- Webhook Routes -----
 app.post("/webhooks/orders-paid", async (req, res) => {
-  // VIKTIGT: Vi använder "Skapande av order" eventet nu
   const order = req.body;
   console.log(`Webhook mottagen för order: ${order.name}`);
 
   try {
+    // HÄR ÄR ÄNDRINGEN: .includes() istället för ===
     const containsSizingKit = order.line_items.some(
-      (item) => item.variant_title === "Sizing Kit First"
+      (item) => item.variant_title.includes("Sizing Kit First")
     );
 
     if (containsSizingKit) {
@@ -63,7 +62,6 @@ app.post("/webhooks/orders-paid", async (req, res) => {
         createdAt: new Date(),
       };
 
-      // Vi ser till att använda den publika adressen i mejlet
       const uniqueUrl = `https://choose.ultravoom.se/choose.html?token=${token}`;
       console.log(`Skapad länk för ${order.email}: ${uniqueUrl}`);
 
@@ -104,7 +102,6 @@ app.get("/api/products", async (_req, res) => {
 });
 
 app.post("/api/choose", async (req, res) => {
-  // Denna funktion bygger vi ut i nästa steg
   res.json({ ok: true });
 });
 

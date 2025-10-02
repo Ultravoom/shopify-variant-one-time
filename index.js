@@ -1,5 +1,5 @@
 // index.js
-// SLUTGILTIG VERSION 2.1 - Renstädad
+// TILLFÄLLIG VERSION FÖR SHOPIFY SUPPORT
 
 // import dotenv from "dotenv";
 // dotenv.config();
@@ -33,7 +33,6 @@ const mailer = nodemailer.createTransport({
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
 });
 
-// Webhook som skickar länk till kund
 app.post("/webhooks/orders-paid", async (req, res) => {
     const order = req.body;
     console.log(`Webhook mottagen för order: ${order.name}`);
@@ -49,8 +48,8 @@ app.post("/webhooks/orders-paid", async (req, res) => {
             await mailer.sendMail({
                 from: `"UltraVoom" <${process.env.SMTP_USER}>`,
                 to: order.email,
-                subject: "Viktigt: Välj storlek för din Smart Ring",
-                html: `<p>Hej ${order.customer.first_name || ''}!</p><p>Tack för din beställning. Välj storlek för din ${colorName}-ring via länken nedan för att slutföra din order.</p><p><a href="${uniqueUrl}"><strong>Klicka här för att välja din storlek</strong></a></p><p>Vänliga hälsningar,<br>Team UltraVoom</p>`,
+                subject: "Action Required: Choose the size for your Smart Ring",
+                html: `<p>Hi ${order.customer.first_name || ''}!</p><p>Thank you for your order. To complete your purchase, please select the size for your ${colorName} ring via the link below.</p><p><a href="${uniqueUrl}"><strong>Click here to choose your size</strong></a></p><p>Best regards,<br>The UltraVoom Team</p>`,
             });
             console.log(`Mejl skickat till ${order.email} med färg: ${colorName}`);
         } else {
@@ -66,7 +65,8 @@ app.post("/webhooks/orders-paid", async (req, res) => {
 // API för att hämta produkter
 app.get("/api/products", async (_req, res) => {
     try {
-        const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json?handle=smart-ring-pro`;
+        // TILLFÄLLIG ÄNDRING: Hämtar ALLA produkter
+        const url = `https://${SHOP}/admin/api/${API_VERSION}/products.json`;
         const r = await fetch(url, { headers: { "X-Shopify-Access-Token": ADMIN_TOKEN, "Accept": "application/json" } });
         const body = await r.json();
         if (!r.ok) throw new Error(body.errors || 'Unknown API error');
@@ -77,7 +77,6 @@ app.get("/api/products", async (_req, res) => {
     }
 });
 
-// API som tar emot kundens val och mailar butiksägaren
 app.post("/api/choose", async (req, res) => {
     const { variantId, token } = req.body;
     if (!variantId || !token) {
@@ -89,7 +88,7 @@ app.post("/api/choose", async (req, res) => {
     }
     try {
         tokenData.used = true;
-        const variantUrl = `https://${SHOP}/admin/api/${API_VERSION}/variants/${variantId}.json`;
+        const variantUrl = `https-://${SHOP}/admin/api/${API_VERSION}/variants/${variantId}.json`;
         const r = await fetch(variantUrl, { headers: { "X-Shopify-Access-Token": ADMIN_TOKEN, "Accept": "application/json" } });
         const { variant } = await r.json();
         const adr = tokenData.shippingAddress;
@@ -97,12 +96,12 @@ app.post("/api/choose", async (req, res) => {
         await mailer.sendMail({
             from: `"UltraVoom App" <${process.env.SMTP_USER}>`,
             to: process.env.SMTP_USER,
-            subject: `✅ Nytt val för order ${tokenData.orderName}`,
-            html: `<h3>Ett val har gjorts för order ${tokenData.orderName}</h3>
-                   <p><strong>Vald variant:</strong> ${variant.title}</p>
-                   <p><strong>Variant-ID:</strong> ${variant.id}</p>
+            subject: `✅ Size selected for order ${tokenData.orderName}`,
+            html: `<h3>A size has been selected for order ${tokenData.orderName}</h3>
+                   <p><strong>Chosen variant:</strong> ${variant.title}</p>
+                   <p><strong>Variant ID:</strong> ${variant.id}</p>
                    <hr>
-                   <h4>Leveransadress:</h4>
+                   <h4>Shipping Address:</h4>
                    <p>${addressString}</p>`,
         });
         res.json({ ok: true });
@@ -112,7 +111,6 @@ app.post("/api/choose", async (req, res) => {
     }
 });
 
-// Starta servern
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

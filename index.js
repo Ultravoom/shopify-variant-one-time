@@ -119,6 +119,12 @@ app.post("/api/choose", async (req, res) => {
     }
 });
 
+// Extremt enkel test-mottagare
+app.post("/test", (req, res) => {
+    console.log("!!! TEST WEBHOOK MOTTETAGET PÅ /test !!!");
+    res.status(200).send("OK FROM /test");
+});
+
 // Starta servern
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
